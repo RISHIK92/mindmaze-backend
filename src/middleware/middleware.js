@@ -1,15 +1,20 @@
-import jwt from "jsonwebtoken";
+import { auth } from "./auth.js";
 
-export default function authenticateToken(req, res, next) {
-  const token = req.header("Authorization");
+export async function verifyFirebaseToken(req, res, next) {
+  const authHeader = req.headers.authorization;
 
-  if (!token) return res.status(401).json({ msg: "Access denied" });
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "No token provided" });
+  }
+
+  const idToken = authHeader.split(" ")[1];
 
   try {
-    const verified = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET);
-    req.user = verified;
+    const decodedToken = await auth.verifyIdToken(idToken);
+    req.user = decodedToken;
     next();
   } catch (error) {
-    res.status(403).json({ msg: "Invalid token" });
+    console.error("Firebase Auth Error:", error);
+    return res.status(401).json({ error: "Invalid or expired token" });
   }
 }

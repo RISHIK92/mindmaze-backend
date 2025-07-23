@@ -14,20 +14,20 @@ datasource db {
 }
 
 model User {
-  id         Int         @id @default(autoincrement())
-  email      String      @unique
-  password   String
-  workspaces Workspace[]
+  id         String      @id
+  email      String?      @unique
+  password   String?
+  // workspaces Workspace[]
 }
 
 model Workspace {
   id        Int      @id @default(autoincrement())
   name      String
 
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  // userId    Int
+  // user      User     @relation(fields: [userId], references: [id])
 
-  todos     Todo[]
+  // todos     Todo[]
 }
 
 model Todo {
@@ -35,8 +35,65 @@ model Todo {
   status      TodoStatus
   todo        String
 
-  workspaceId Int
-  workspace   Workspace   @relation(fields: [workspaceId], references: [id])
+  // workspaceId Int
+  // workspace   Workspace   @relation(fields: [workspaceId], references: [id])
+}
+
+model TimeManagement {
+  id          String         @id
+  text        String
+  data        String
+  completedAt Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+
+  // workspaceId Int
+  // workspace   Workspace   @relation(fields: [workspaceId], references: [id])
+}
+
+model Project {
+  id          Int         @id @default(autoincrement())
+  projectName String
+  deadline    DateTime
+  progress    Int         @default(0)
+  createdAt   DateTime    @default(now())
+
+  // workspaceId Int
+  // workspace   Workspace   @relation(fields: [workspaceId], references: [id])
+}
+
+model Note {
+  id          Int         @id @default(autoincrement())
+  title       String
+  notes       String
+  calander    DateTime
+  createdAt   DateTime    @default(now())
+
+  // workspaceId Int
+  // workspace   Workspace   @relation(fields: [workspaceId], references: [id])
+}
+
+model Goal {
+  id          Int         @id @default(autoincrement())
+  goal        String
+  deadline    String
+  progress    Int         @default(0)
+  createdAt   DateTime    @default(now())
+
+  // workspaceId Int
+  // workspace   Workspace   @relation(fields: [workspaceId], references: [id])
+}
+
+model Planner {
+  id          Int         @id @default(autoincrement())
+  task        String
+  prioirity   String
+  categories  String        
+  deadline    DateTime
+  date        DateTime
+  createdAt   DateTime    @default(now())
+
+  // workspaceId Int
+  // workspace   Workspace   @relation(fields: [workspaceId], references: [id])
 }
 
 enum TodoStatus {

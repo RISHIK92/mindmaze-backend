@@ -1,17 +1,22 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import pkg from "@prisma/client";
-const { PrismaClient } = pkg;
+import { PrismaClient } from "@prisma/client";
+import router from "./routes/todos.js";
+import cors from "cors";
+import { verifyFirebaseToken } from "./middleware/middleware.js";
 
 const app = express();
 const prisma = new PrismaClient();
 
 app.use(express.json());
+app.use(cors());
 
-app.post("/signup", async (req, res) => {
+app.use("/todos", router);
+
+app.post("/signup", verifyFirebaseToken, async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, uid } = req.user;
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -21,14 +26,13 @@ app.post("/signup", async (req, res) => {
       return res.status(400).json({ msg: "User Already Exists" });
     }
 
-    const hashPassword = await bcrypt.hash(password, 10);
-
     const user = await prisma.user.create({
       data: {
-        email: email,
-        password: hashPassword,
+        email,
+        id: uid,
       },
     });
+    console.log(user, "user created");
 
     return res.status(200).json({ msg: "User Created" });
   } catch (error) {
@@ -36,20 +40,18 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-app.post("/login", async (req, res) => {
+app.post("/login", verifyFirebaseToken, async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { uid } = req.user;
 
-    const checkUser = await prisma.user.findUnique({ where: { email } });
+    const checkUser = await prisma.user.findUnique({ where: { id: uid } });
 
     if (!checkUser) {
       return res.status(400).json({ msg: "User does not exist" });
     }
 
-    const checkPassword = await bcrypt.compare(password, checkUser.password);
-
-    if (!checkPassword) {
-      return res.json({ msg: "Incorrect Password" });
+    if (checkUser.id && checkUser.id !== uid) {
+      return res.status(401).json({ msg: "UID mismatch" });
     }
 
     const token = jwt.sign(
