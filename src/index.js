@@ -4,6 +4,10 @@ import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 import router from "./routes/todos.js";
 import routerTime from "./routes/time.js";
+import routerproject from "./routes/project.js";
+import routerNotes from "./routes/notes.js";
+import routerGoal from "./routes/goal.js";
+import routerPlanner from "./routes/planner.js";
 import cors from "cors";
 import { verifyFirebaseToken } from "./middleware/middleware.js";
 
@@ -15,6 +19,10 @@ app.use(cors());
 
 app.use("/todos", verifyFirebaseToken, router);
 app.use("/time-management", verifyFirebaseToken, routerTime);
+app.use("/projects", verifyFirebaseToken, routerproject);
+app.use("/notes", verifyFirebaseToken, routerNotes);
+app.use("/goals", verifyFirebaseToken, routerGoal);
+app.use("/planner", verifyFirebaseToken, routerPlanner);
 
 app.post("/signup", verifyFirebaseToken, async (req, res) => {
   try {
