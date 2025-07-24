@@ -9,17 +9,18 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
     const { task, priority, categories, deadline, date } = req.body;
     console.log(task, priority, categories, deadline, date);
     const userId = req.user.uid;
-    console.log(userId, "User ID from token");
+    console.log(typeof userId, "User ID from token");
     const newPlanner = await prisma.planner.create({
       data: {
         task,
         priority,
         categories,
-        deadline: new Date(deadline),
+        deadline: deadline,
         date: new Date(date),
         userId,
       },
     });
+    console.log(newPlanner, "New planner task created");
     res.status(201).json(newPlanner);
   } catch (error) {
     res.status(500).json({ msg: "Error creating planner task", error });
@@ -68,7 +69,7 @@ router.put("/:id", verifyFirebaseToken, async (req, res) => {
         task,
         priority,
         categories,
-        deadline: new Date(deadline),
+        deadline: deadline,
         date: new Date(date),
       },
     });

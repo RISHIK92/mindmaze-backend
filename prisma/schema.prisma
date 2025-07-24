@@ -15,8 +15,7 @@ model User {
   email      String?        @unique
   password   String?
   createdAt  DateTime       @default(now())
-  
-  // Relationships
+
   workspaces      Workspace[]
   todos           Todo[]
   timeManagement  TimeManagement[]
@@ -112,9 +111,9 @@ model Goal {
 model Planner {
   id          Int         @id @default(autoincrement())
   task        String
-  priority    String      // Fixed typo: was "prioirity"
-  categories  String        
-  deadline    DateTime
+  priority    String
+  categories  String
+  deadline    String
   date        DateTime
   createdAt   DateTime    @default(now())
 
