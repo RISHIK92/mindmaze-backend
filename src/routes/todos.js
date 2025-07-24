@@ -1,39 +1,39 @@
-import { PrismaClient } from "@prisma/client";
 import express from "express";
 import { verifyFirebaseToken } from "../middleware/middleware.js";
+import { prisma } from "../index.js";
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
-router.use(verifyFirebaseToken);
-
-router.post("/", async (req, res) => {
+router.post("/", verifyFirebaseToken, async (req, res) => {
   try {
     const { status, todo } = req.body;
     const userId = req.user.uid;
+    console.log(userId, "user ID from token");
     const newTodo = await prisma.todo.create({
       data: { status, todo, userId },
     });
+    console.log(newTodo, "new todo created");
     res.status(201).json(newTodo);
   } catch (error) {
     res.status(500).json({ msg: "Error creating todo", error });
   }
 });
 
-router.get("/", async (req, res) => {
+router.get("/", verifyFirebaseToken, async (req, res) => {
   try {
     const userId = req.user.uid;
     const todos = await prisma.todo.findMany({
-      where: { userId },
+      where: { userId: userId },
     });
+    console.log(todos, "todos fetched");
     res.json(todos);
   } catch (error) {
-    res.status(500).json({ msg: "Error fetching todos", error });
+    console.error("Error fetching todos:", error);
+    res.status(500).json({ msg: "Error fetching todos", error: error.message });
   }
 });
 
-// Get a single todo by id (only if it belongs to the user)
-router.get("/:id", async (req, res) => {
+router.get("/:id", verifyFirebaseToken, async (req, res) => {
   try {
     const userId = req.user.uid;
     const todo = await prisma.todo.findFirst({
@@ -46,7 +46,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", verifyFirebaseToken, async (req, res) => {
   try {
     const userId = req.user.uid;
     const { status, todo } = req.body;
@@ -65,7 +65,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", verifyFirebaseToken, async (req, res) => {
   try {
     const userId = req.user.uid;
     const existing = await prisma.todo.findFirst({

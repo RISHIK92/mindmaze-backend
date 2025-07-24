@@ -3,16 +3,18 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 import router from "./routes/todos.js";
+import routerTime from "./routes/time.js";
 import cors from "cors";
 import { verifyFirebaseToken } from "./middleware/middleware.js";
 
 const app = express();
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 
 app.use(express.json());
 app.use(cors());
 
-app.use("/todos", router);
+app.use("/todos", verifyFirebaseToken, router);
+app.use("/time-management", verifyFirebaseToken, routerTime);
 
 app.post("/signup", verifyFirebaseToken, async (req, res) => {
   try {
@@ -59,7 +61,7 @@ app.post("/login", verifyFirebaseToken, async (req, res) => {
       process.env.JWT_SECRET || "123123"
     );
 
-    res.status(200).send(token);
+    res.status(200).send({ token });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ msg: "Internal Server Error" });

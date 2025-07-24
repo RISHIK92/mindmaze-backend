@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,40 +11,59 @@ datasource db {
 }
 
 model User {
-  id         String      @id
-  email      String?      @unique
+  id         String         @id
+  email      String?        @unique
   password   String?
-  // workspaces Workspace[]
+  createdAt  DateTime       @default(now())
+  
+  // Relationships
+  workspaces      Workspace[]
+  todos           Todo[]
+  timeManagement  TimeManagement[]
+  projects        Project[]
+  notes           Note[]
+  goals           Goal[]
+  planners        Planner[]
 }
 
 model Workspace {
   id        Int      @id @default(autoincrement())
   name      String
+  createdAt DateTime @default(now())
 
-  // userId    Int
-  // user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // You can add todos relation here if needed per workspace
   // todos     Todo[]
 }
 
 model Todo {
   id          Int         @id @default(autoincrement())
-  status      TodoStatus
+  status      Boolean     @default(false) 
   todo        String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
-  // workspaceId Int
-  // workspace   Workspace   @relation(fields: [workspaceId], references: [id])
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // workspaceId Int?
+  // workspace   Workspace?  @relation(fields: [workspaceId], references: [id])
 }
 
 model TimeManagement {
-  id          String         @id
+  id          String      @id @default(cuid())
   text        String
   data        String
   completedAt Boolean     @default(false)
   createdAt   DateTime    @default(now())
 
-  // workspaceId Int
-  // workspace   Workspace   @relation(fields: [workspaceId], references: [id])
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // workspaceId Int?
+  // workspace   Workspace?  @relation(fields: [workspaceId], references: [id])
 }
 
 model Project {
@@ -56,20 +72,28 @@ model Project {
   deadline    DateTime
   progress    Int         @default(0)
   createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
-  // workspaceId Int
-  // workspace   Workspace   @relation(fields: [workspaceId], references: [id])
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // workspaceId Int?
+  // workspace   Workspace?  @relation(fields: [workspaceId], references: [id])
 }
 
 model Note {
   id          Int         @id @default(autoincrement())
   title       String
   notes       String
-  calander    DateTime
+  calendar    DateTime    // Fixed typo: was "calander"
   createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
-  // workspaceId Int
-  // workspace   Workspace   @relation(fields: [workspaceId], references: [id])
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // workspaceId Int?
+  // workspace   Workspace?  @relation(fields: [workspaceId], references: [id])
 }
 
 model Goal {
@@ -78,25 +102,28 @@ model Goal {
   deadline    String
   progress    Int         @default(0)
   createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
-  // workspaceId Int
-  // workspace   Workspace   @relation(fields: [workspaceId], references: [id])
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // workspaceId Int?
+  // workspace   Workspace?  @relation(fields: [workspaceId], references: [id])
 }
 
 model Planner {
   id          Int         @id @default(autoincrement())
   task        String
-  prioirity   String
+  priority    String      // Fixed typo: was "prioirity"
   categories  String        
   deadline    DateTime
   date        DateTime
   createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
-  // workspaceId Int
-  // workspace   Workspace   @relation(fields: [workspaceId], references: [id])
-}
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-enum TodoStatus {
-  pending
-  completed
+  // workspaceId Int?
+  // workspace   Workspace?  @relation(fields: [workspaceId], references: [id])
 }
